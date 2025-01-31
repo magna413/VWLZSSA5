@@ -32,3 +32,43 @@ compressed_data = lzss.compress(decompressed_data)
 ```
 ⚠️ WARNING: Use Compression with Caution!
 
+
+# LZSS Compression and Decompression (C Implementation)
+
+## Overview
+This repository provides a C implementation of the LZSS compression and decompression algorithm, allowing efficient encoding and decoding of binary data using a sliding window mechanism.
+
+## Features
+- Compresses and decompresses binary files using the Custom VW LZSS algorithm
+- Uses a 1023-byte sliding window for efficient encoding
+- Outputs data in a format compatible with LZSS decompression
+
+## Compilation
+To compile the program, use the following command:
+```sh
+gcc -o lzss lzss.c
+```
+
+## Usage
+### Compress a file
+```sh
+./lzss compress input.bin output.lzss
+```
+### Decompress a file
+```sh
+./lzss decompress output.lzss decompressed.bin
+```
+
+## Example
+Compress a binary file:
+```sh
+./lzss compress sample.bin sample_compressed.lzss
+```
+
+## File Structure
+- `lzss.c` - The main implementation of custom LZSS compression and decompression
+- `README.md` - Documentation on how to use the tool
+
+
+
+
