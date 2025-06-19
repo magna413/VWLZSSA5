@@ -7,38 +7,41 @@ class VWLZSSA5:
         self.max_match_length = 63
 
     def compress(self, input_data: bytes) -> bytearray:
-        input_length = len(input_data)
-        output = bytearray()
-        read_pos = 0
-        bit_flag_pos = len(output)
-        bit_flags = 0
-        bit_count = 0
-        output.append(0)  # Placeholder for bit flags
+    input_length = len(input_data)
+    output = bytearray()
+    read_pos = 0
+    bit_flag_pos = len(output)
+    bit_flags = 0
+    bit_count = 0
+    output.append(0)  # Placeholder for bit flags
 
-        while read_pos < input_length:
-            match_length, match_offset = self.find_longest_match(input_data, read_pos)
-            if match_length >= self.min_match_length:
-                output.append((match_length << 2) | (match_offset >> 8))
-                output.append(match_offset & 0xFF)
-                read_pos += match_length
-                bit_flags |= 1 << (7 - bit_count)
-            else:
-                output.append(input_data[read_pos])
-                read_pos += 1
-            bit_count += 1
+    while read_pos < input_length:
+        match_length, match_offset = self.find_longest_match(input_data, read_pos)
+        if match_length >= self.min_match_length:
+            # Correctly pack 6-bit length and 10-bit offset into 16 bits
+            packed = (match_length << 10) | match_offset
+            output.append((packed >> 8) & 0xFF)
+            output.append(packed & 0xFF)
+            read_pos += match_length
+            bit_flags |= 1 << (7 - bit_count)
+        else:
+            output.append(input_data[read_pos])
+            read_pos += 1
 
-            if bit_count == 8:
-                output[bit_flag_pos] = bit_flags
-                bit_flag_pos = len(output)
-                output.append(0)
-                bit_flags = 0
-                bit_count = 0
+        bit_count += 1
 
-        if bit_count > 0:
+        if bit_count == 8:
             output[bit_flag_pos] = bit_flags
+            bit_flag_pos = len(output)
+            output.append(0)  # Reserve space for next flag byte
+            bit_flags = 0
+            bit_count = 0
 
-        return output
+    if bit_count > 0:
+        output[bit_flag_pos] = bit_flags
 
+    return output
+    
     def decompress(self, input_data: bytes) -> bytearray:
         output = bytearray()
         it = iter(input_data)
